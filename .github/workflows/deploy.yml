@@ -1,0 +1,24 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/metrics
+            git pull origin main
+            cat > .env <<EOF
+            NTFY_TOPIC=${{ secrets.NTFY_TOPIC }}
+            GF_ADMIN_PASSWORD=${{ secrets.GF_ADMIN_PASSWORD }}
+            EOF
+            docker-compose up -d --build

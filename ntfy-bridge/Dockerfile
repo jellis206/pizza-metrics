@@ -1,0 +1,10 @@
+FROM golang:1.22-alpine AS build
+WORKDIR /src
+COPY go.mod ./
+COPY main.go ./
+RUN go build -o /ntfy-bridge .
+
+FROM alpine:3.20
+COPY --from=build /ntfy-bridge /ntfy-bridge
+EXPOSE 9199
+ENTRYPOINT ["/ntfy-bridge"]
