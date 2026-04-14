@@ -28,6 +28,10 @@ func main() {
 	if ntfyURL == "" {
 		ntfyURL = "https://ntfy.sh"
 	}
+	grafanaURL := os.Getenv("GRAFANA_URL")
+	if grafanaURL == "" {
+		grafanaURL = "https://metrics.urjellis.com"
+	}
 
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -82,6 +86,11 @@ func main() {
 			req.Header.Set("Title", title)
 			req.Header.Set("Priority", priority)
 			req.Header.Set("Tags", tags)
+
+			dashboardURL := fmt.Sprintf("%s/d/cfgcyvspjtq0wa/pizza-dashboard", grafanaURL)
+			logsURL := fmt.Sprintf("%s/d/cfgcyvspjtq0wa/pizza-dashboard?viewPanel=11", grafanaURL)
+			actions := fmt.Sprintf("view, Dashboard, %s; view, Logs, %s", dashboardURL, logsURL)
+			req.Header.Set("Actions", actions)
 
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
